@@ -1,53 +1,40 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System; // Action 이벤트를 위해 추가
 
 public class SessionManager : MonoBehaviour
 {
     [Header("실험 설정")]
-    public float maxOffsetLimit = 0.1f; // 최대 오프셋 범위
-
-    [Header("UI 컴포넌트")]
-    public Slider targetSlider;          
-    public TextMeshProUGUI sliderValueText; 
-    public Button startButton;           
-    public TextMeshProUGUI statusText;   
+    public float maxOffsetLimit = 0.1f;
+    public int targetCount = 10; // 고정값 10
 
     [Header("외부 스크립트 연결")]
     public TypingCount typingCountScript; 
     public DelayController delayController; 
+    
+    // [추가] 텍스트 UI는 ScenarioManager와 공유해서 사용
+    public TextMeshProUGUI statusText;   
 
-    private int targetCount = 10; 
+    // [추가] 외부로 상태를 알리는 이벤트
+    public event Action OnSessionEnded;  // 한 세션 끝 (설문 타이밍)
+    public event Action OnAllFinished;   // 모든 실험 끝
+
     private bool isSessionActive = false;
-
     private List<float> sessionOffsets = new List<float>(); 
     private int currentSessionIndex = 0; 
 
+    public int TotalSessions => sessionOffsets.Count;
+    public int CurrentSessionNum => currentSessionIndex + 1;
+
     private void Start()
     {
-        if (targetSlider != null)
-        {
-            targetSlider.minValue = 1;
-            // [수정] 슬라이더 최대값을 10으로 변경
-            targetSlider.maxValue = 10; 
-            targetSlider.wholeNumbers = true;
-            targetSlider.onValueChanged.AddListener(OnSliderValueChanged);
-            targetCount = (int)targetSlider.value;
-            UpdateSliderText();
-        }
-
-        if (startButton != null)
-        {
-            startButton.onClick.AddListener(OnStartExperiment);
-        }
+        // 슬라이더 및 버튼 로직 제거 (ScenarioManager가 제어함)
 
         if (typingCountScript != null)
         {
             typingCountScript.OnCountUpdated += CheckSessionProgress;
         }
-
-        if (statusText != null) statusText.text = "Ready to Start";
     }
 
     private void OnDestroy()
@@ -58,60 +45,16 @@ public class SessionManager : MonoBehaviour
         }
     }
 
-    private void OnSliderValueChanged(float value)
-    {
-        targetCount = (int)value;
-        UpdateSliderText();
-    }
-
-    private void UpdateSliderText()
-    {
-        if (sliderValueText != null)
-            sliderValueText.text = $"Target Sentences: {targetCount}";
-    }
-
-    private void OnStartExperiment()
+    // [변경] 외부(ScenarioManager)에서 호출하여 초기화
+    public void InitializeExperiment()
     {
         GenerateSessionList();
         ShuffleSessionList();
         currentSessionIndex = 0;
-        StartNextSession();
     }
 
-    private void GenerateSessionList()
-    {
-        sessionOffsets.Clear();
-        float step = 0.02f; 
-
-        if (delayController != null)
-        {
-            step = delayController.offsetStep; 
-        }
-
-        for (float val = 0.0f; val <= maxOffsetLimit + 0.0001f; val += step)
-        {
-            sessionOffsets.Add(val);
-        }
-
-        Debug.Log($"[SessionManager] 세션 생성 완료: 0 ~ {maxOffsetLimit} (Step: {step}), 총 {sessionOffsets.Count}개");
-    }
-
-    private void ShuffleSessionList()
-    {
-        for (int i = 0; i < sessionOffsets.Count; i++)
-        {
-            float temp = sessionOffsets[i];
-            int randomIndex = Random.Range(i, sessionOffsets.Count);
-            sessionOffsets[i] = sessionOffsets[randomIndex];
-            sessionOffsets[randomIndex] = temp;
-        }
-
-        string log = "세션 순서: ";
-        foreach (var offset in sessionOffsets) log += $"{offset:F3} -> "; 
-        Debug.Log(log);
-    }
-
-    private void StartNextSession()
+    // [변경] 외부에서 호출하여 다음 세션 시작
+    public void StartNextSession()
     {
         if (currentSessionIndex >= sessionOffsets.Count)
         {
@@ -127,11 +70,8 @@ public class SessionManager : MonoBehaviour
             delayController.SetOffset(nextOffset);
         }
 
-        // [수정] 오프셋 정보 제거, 진행 상황 초기값(0) 표시
-        if (statusText != null)
-        {
-            statusText.text = $"Session {currentSessionIndex + 1}/{sessionOffsets.Count}\nProgress: 0 / {targetCount}";
-        }
+        // 세션 시작 시 진행률 표시
+        UpdateStatusText(0);
 
         if (typingCountScript != null)
         {
@@ -145,11 +85,7 @@ public class SessionManager : MonoBehaviour
     {
         if (!isSessionActive) return;
 
-        // [수정] 오프셋 정보 제거, 세션 번호와 문장 갯수만 표시
-        if (statusText != null && currentCount < targetCount)
-        {
-            statusText.text = $"Session {currentSessionIndex + 1}/{sessionOffsets.Count}\nProgress: {currentCount} / {targetCount}";
-        }
+        UpdateStatusText(currentCount);
 
         if (currentCount >= targetCount)
         {
@@ -157,32 +93,59 @@ public class SessionManager : MonoBehaviour
         }
     }
 
+    private void UpdateStatusText(int current)
+    {
+        if (statusText != null)
+        {
+            statusText.text = $"Session {currentSessionIndex + 1}/{sessionOffsets.Count}\nProgress: <color=yellow>{current}</color> / {targetCount}";
+        }
+    }
+
     private void CompleteSession()
     {
         Debug.Log($"[SessionManager] 세션 {currentSessionIndex + 1} 완료!");
-        
+        isSessionActive = false; // 입력 중지 상태
+
         if (DataManager.Instance != null)
         {
             DataManager.Instance.SaveCurrentCsvAndReset();
         }
 
         currentSessionIndex++;
-        StartNextSession();
+
+        // [핵심 변경] 바로 StartNextSession을 부르지 않고 이벤트만 발생시킴
+        OnSessionEnded?.Invoke();
     }
 
     private void AllExperimentsOver()
     {
         isSessionActive = false;
+        if (delayController != null) delayController.ResetDelay(); 
 
-        if (delayController != null)
-        {
-            delayController.ResetDelay(); 
-        }
+        OnAllFinished?.Invoke(); // 종료 이벤트 발생
+    }
 
-        if (statusText != null)
+    // 오프셋 리스트 생성 로직 (기존 동일)
+    private void GenerateSessionList()
+    {
+        sessionOffsets.Clear();
+        float step = 0.02f; 
+        if (delayController != null) step = delayController.offsetStep; 
+
+        for (float val = 0.0f; val <= maxOffsetLimit + 0.0001f; val += step)
         {
-            statusText.text = "<color=red>All over</color>";
+            sessionOffsets.Add(val);
         }
-        Debug.Log("[SessionManager] 모든 실험 세션 종료 (Delay 0으로 초기화됨)");
+    }
+
+    private void ShuffleSessionList()
+    {
+        for (int i = 0; i < sessionOffsets.Count; i++)
+        {
+            float temp = sessionOffsets[i];
+            int randomIndex = UnityEngine.Random.Range(i, sessionOffsets.Count);
+            sessionOffsets[i] = sessionOffsets[randomIndex];
+            sessionOffsets[randomIndex] = temp;
+        }
     }
 }
