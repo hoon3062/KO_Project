@@ -2,53 +2,40 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System; // [필수] Action 이벤트를 사용하기 위해 추가
 
 public class FrequencySessionManager : MonoBehaviour
 {
     [Header("실험 주사율 설정")]
-    // [설정] 요청하신 4가지 주사율을 리스트에 기본값으로 넣어둠
     public List<float> targetFrequencies = new List<float> { 90f, 45f, 30f, 22.5f, 18f };
+    public int targetCount = 10; // 목표 문장 수 (기본 10)
 
     [Header("UI 컴포넌트")]
-    public Slider targetSlider;          
-    public TextMeshProUGUI sliderValueText; 
-    public Button startButton;           
-    public TextMeshProUGUI statusText;   
+    // [참고] StartButton, Slider는 ScenarioManager가 주도권을 가지면 사용되지 않을 수 있습니다.
+    public TextMeshProUGUI statusText;   // ScenarioManager와 공유되는 텍스트
 
     [Header("외부 스크립트 연결")]
     public TypingCount typingCountScript; 
-    public FrequencyController freqController; // [변경] DelayController -> FrequencyController
+    public FrequencyController freqController; 
 
-    private int targetCount = 10; 
+    // [추가] ScenarioManager가 구독할 이벤트
+    public event Action OnSessionEnded;  // 한 주사율 세션 끝 (설문 타이밍)
+    public event Action OnAllFinished;   // 모든 실험 끝
+
     private bool isSessionActive = false;
-
-    // 실험 진행을 위한 큐 (섞인 주사율 저장)
     private List<float> randomizedSessions = new List<float>(); 
     private int currentSessionIndex = 0; 
 
     private void Start()
     {
-        if (targetSlider != null)
-        {
-            targetSlider.minValue = 1;
-            targetSlider.maxValue = 10; // 최대 문장 수
-            targetSlider.wholeNumbers = true;
-            targetSlider.onValueChanged.AddListener(OnSliderValueChanged);
-            targetCount = (int)targetSlider.value;
-            UpdateSliderText();
-        }
-
-        if (startButton != null)
-        {
-            startButton.onClick.AddListener(OnStartExperiment);
-        }
-
+        // TypingCount 이벤트 연결
         if (typingCountScript != null)
         {
             typingCountScript.OnCountUpdated += CheckSessionProgress;
         }
 
-        if (statusText != null) statusText.text = "Frequency Exp Ready";
+        // 초기 상태 텍스트
+        UpdateStatusText("Frequency Experiment Ready");
     }
 
     private void OnDestroy()
@@ -59,48 +46,25 @@ public class FrequencySessionManager : MonoBehaviour
         }
     }
 
-    private void OnSliderValueChanged(float value)
+    // [추가] ScenarioManager에서 호출하여 실험 준비
+    public void InitializeExperiment()
     {
-        targetCount = (int)value;
-        UpdateSliderText();
-    }
-
-    private void UpdateSliderText()
-    {
-        if (sliderValueText != null)
-            sliderValueText.text = $"Target Sentences: {targetCount}";
-    }
-
-    private void OnStartExperiment()
-    {
-        // 1. 세션 리스트 준비 (복사)
+        // 1. 세션 리스트 준비 (원본 복사)
         randomizedSessions = new List<float>(targetFrequencies);
         
         // 2. 랜덤 셔플
         ShuffleSessionList();
         
-        // 3. 시작
+        // 3. 인덱스 초기화
         currentSessionIndex = 0;
-        StartNextSession();
+
+        Debug.Log($"[FrequencyManager] 실험 초기화 완료. 총 {randomizedSessions.Count}개 세션.");
     }
 
-    private void ShuffleSessionList()
+    // [추가] ScenarioManager에서 호출하여 다음 세션 시작
+    public void StartNextSession()
     {
-        for (int i = 0; i < randomizedSessions.Count; i++)
-        {
-            float temp = randomizedSessions[i];
-            int randomIndex = Random.Range(i, randomizedSessions.Count);
-            randomizedSessions[i] = randomizedSessions[randomIndex];
-            randomizedSessions[randomIndex] = temp;
-        }
-
-        string log = "[FrequencyManager] 세션 순서: ";
-        foreach (var hz in randomizedSessions) log += $"{hz}Hz -> "; 
-        Debug.Log(log);
-    }
-
-    private void StartNextSession()
-    {
+        // 모든 세션이 끝났는지 확인
         if (currentSessionIndex >= randomizedSessions.Count)
         {
             AllExperimentsOver();
@@ -110,36 +74,39 @@ public class FrequencySessionManager : MonoBehaviour
         isSessionActive = true;
         float nextHz = randomizedSessions[currentSessionIndex];
 
-        // [핵심] 주사율 컨트롤러 값 변경
+        // [핵심] 주사율 변경
         if (freqController != null)
         {
             freqController.SetHz(nextHz);
         }
 
-        // 현재 세션 상태 표시 (Hz 정보는 숨김, 진행도만 표시)
-        if (statusText != null)
-        {
-            statusText.text = $"Session {currentSessionIndex + 1}/{randomizedSessions.Count}\nProgress: 0 / {targetCount}";
-        }
-
-        // 문장 카운트 초기화
+        // 진행률 초기화 및 UI 표시
         if (typingCountScript != null)
         {
             typingCountScript.ResetCount();
         }
         
+        UpdateUIProgress(0);
+        
         Debug.Log($"[FrequencyManager] 세션 {currentSessionIndex + 1} 시작. Target Hz: {nextHz}");
+    }
+
+    private void ShuffleSessionList()
+    {
+        for (int i = 0; i < randomizedSessions.Count; i++)
+        {
+            float temp = randomizedSessions[i];
+            int randomIndex = UnityEngine.Random.Range(i, randomizedSessions.Count);
+            randomizedSessions[i] = randomizedSessions[randomIndex];
+            randomizedSessions[randomIndex] = temp;
+        }
     }
 
     private void CheckSessionProgress(int currentCount)
     {
         if (!isSessionActive) return;
 
-        // 진행 상황 업데이트
-        if (statusText != null && currentCount < targetCount)
-        {
-            statusText.text = $"Session {currentSessionIndex + 1}/{randomizedSessions.Count}\nProgress: {currentCount} / {targetCount}";
-        }
+        UpdateUIProgress(currentCount);
 
         // 목표 달성 시
         if (currentCount >= targetCount)
@@ -148,19 +115,35 @@ public class FrequencySessionManager : MonoBehaviour
         }
     }
 
+    private void UpdateUIProgress(int current)
+    {
+        if (statusText != null)
+        {
+            statusText.text = $"Session {currentSessionIndex + 1}/{randomizedSessions.Count}\nProgress: <color=yellow>{current}</color> / {targetCount}";
+        }
+    }
+
+    private void UpdateStatusText(string msg)
+    {
+        if (statusText != null) statusText.text = msg;
+    }
+
     private void CompleteSession()
     {
         Debug.Log($"[FrequencyManager] 세션 {currentSessionIndex + 1} 완료!");
         
-        // 데이터 저장 (DataManager가 있다면)
+        isSessionActive = false; // 입력 중지
+
+        // 데이터 저장
         if (DataManager.Instance != null)
         {
-            // 현재까지의 기록을 파일로 저장하고 다음 파일을 준비함
             DataManager.Instance.SaveCurrentCsvAndReset();
         }
 
         currentSessionIndex++;
-        StartNextSession();
+
+        // [중요] 바로 다음 세션을 시작하지 않고, 이벤트를 발생시켜 ScenarioManager에게 알림 (설문 타임)
+        OnSessionEnded?.Invoke();
     }
 
     private void AllExperimentsOver()
@@ -173,10 +156,7 @@ public class FrequencySessionManager : MonoBehaviour
             freqController.ResetFreq(); 
         }
 
-        if (statusText != null)
-        {
-            statusText.text = "<color=red>Frequency Exp Finished</color>";
-        }
-        Debug.Log("[FrequencyManager] 모든 주사율 실험 세션 종료 (90Hz로 초기화됨)");
+        OnAllFinished?.Invoke(); // 종료 이벤트 발생
+        Debug.Log("[FrequencyManager] 모든 실험 종료됨.");
     }
 }

@@ -11,6 +11,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/TutorialScene.unity
     guid: dbbbacdf9ff454912a9db70a62991803
+  - enabled: 1
+    path: Assets/Scenes/DelayScene.unity
+    guid: 4149c4805248a46ee96d761833f84d4a
+  - enabled: 1
+    path: Assets/Scenes/RateScene.unity
+    guid: f0b24eb4d8128437e9efe957a22247da
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: bfa1182bd221b4ca89619141f66f1260, type: 2}
     Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: dc5a169419fa04987b057f65238cf3ba, type: 2}
