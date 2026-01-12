@@ -1810,15 +1810,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7748454099033316013, guid: df7ec8feb3c55447988d97d7619c880f, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.00013232
+      value: 0.00012
       objectReference: {fileID: 0}
     - target: {fileID: 7748454099033316013, guid: df7ec8feb3c55447988d97d7619c880f, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.00013232
+      value: 0.00012
       objectReference: {fileID: 0}
     - target: {fileID: 7748454099033316013, guid: df7ec8feb3c55447988d97d7619c880f, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.00013232
+      value: 0.00012
       objectReference: {fileID: 0}
     - target: {fileID: 7748454099033316013, guid: df7ec8feb3c55447988d97d7619c880f, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3899,12 +3899,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SessionManager
   maxOffsetLimit: 0.1
-  targetSlider: {fileID: 1676399214}
-  sliderValueText: {fileID: 1386266535}
-  startButton: {fileID: 647319521}
-  statusText: {fileID: 1868475262}
+  targetCount: 10
   typingCountScript: {fileID: 1684042279}
   delayController: {fileID: 423532998}
+  statusText: {fileID: 1868475262}
 --- !u!114 &725947972
 MonoBehaviour:
   m_ObjectHideFlags: 0

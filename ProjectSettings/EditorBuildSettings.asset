@@ -10,7 +10,7 @@ EditorBuildSettings:
     guid: 7703d78e8f828499687a72028641af7c
   - enabled: 1
     path: Assets/Scenes/TutorialScene.unity
-    guid: dbbbacdf9ff454912a9db70a62991803
+    guid: 6fd81ebeabaa445fd9ce72491d7d5e2f
   - enabled: 1
     path: Assets/Scenes/DelayScene.unity
     guid: 4149c4805248a46ee96d761833f84d4a

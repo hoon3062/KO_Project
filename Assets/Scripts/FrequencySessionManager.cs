@@ -28,6 +28,10 @@ public class FrequencySessionManager : MonoBehaviour
 
     private void Start()
     {
+        if (DataManager.Instance != null)
+        {
+            DataManager.Instance.SaveCurrentCsvAndReset();
+        }
         // TypingCount 이벤트 연결
         if (typingCountScript != null)
         {

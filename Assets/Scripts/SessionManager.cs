@@ -30,7 +30,10 @@ public class SessionManager : MonoBehaviour
     private void Start()
     {
         // 슬라이더 및 버튼 로직 제거 (ScenarioManager가 제어함)
-
+        if (DataManager.Instance != null)
+        {
+            DataManager.Instance.SaveCurrentCsvAndReset();
+        }
         if (typingCountScript != null)
         {
             typingCountScript.OnCountUpdated += CheckSessionProgress;

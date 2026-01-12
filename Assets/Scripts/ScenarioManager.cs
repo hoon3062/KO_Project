@@ -15,7 +15,7 @@ public class ScenarioManager : MonoBehaviour
     // 두 매니저를 모두 연결해두고, 씬에 따라 하나만 사용합니다.
     public SessionManager sessionManager;           // DelayScene용
     public FrequencySessionManager frequencyManager; // RateScene용
-
+    public GameObject exitButton; // 종료 버튼
     // 현재 모드를 구분하기 위한 플래그
     private bool isRateMode = false; 
 
@@ -92,7 +92,7 @@ public class ScenarioManager : MonoBehaviour
 
     private IEnumerator IntroScenario()
     {
-        ShowText("한 세션당 타이핑 해야 할 문장은\n총 10문장입니다.");
+        ShowText("한 세션당 타이핑 해야 할\n문장은 총 10문장입니다.");
         yield return new WaitForSeconds(3.0f);
 
         ShowText("각 세션이 끝날 때마다\n설문지를 작성해주시면 됩니다.");
@@ -153,6 +153,10 @@ public class ScenarioManager : MonoBehaviour
         if (virtualKeyboardRoot != null) virtualKeyboardRoot.SetActive(false);
         if (nextButton != null) nextButton.SetActive(false);
         ShowText("모든 실험이 종료되었습니다.\n참여해 주셔서 감사합니다.");
+        if (exitButton != null)
+        {
+            exitButton.SetActive(true);
+        }
     }
 
     private void ShowText(string message)

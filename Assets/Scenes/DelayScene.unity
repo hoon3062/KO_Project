@@ -1171,7 +1171,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1944077290725489356, guid: df7ec8feb3c55447988d97d7619c880f, type: 3}
       propertyPath: m_TagString
-      value: Movable
+      value: Untagged
       objectReference: {fileID: 0}
     - target: {fileID: 1948482820469343574, guid: df7ec8feb3c55447988d97d7619c880f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -1343,7 +1343,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3458718528177788252, guid: df7ec8feb3c55447988d97d7619c880f, type: 3}
       propertyPath: m_TagString
-      value: Movable
+      value: Untagged
       objectReference: {fileID: 0}
     - target: {fileID: 3467603693053725977, guid: df7ec8feb3c55447988d97d7619c880f, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1823,15 +1823,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7748454099033316013, guid: df7ec8feb3c55447988d97d7619c880f, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.00013232
+      value: 0.00012
       objectReference: {fileID: 0}
     - target: {fileID: 7748454099033316013, guid: df7ec8feb3c55447988d97d7619c880f, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.00013232
+      value: 0.00012
       objectReference: {fileID: 0}
     - target: {fileID: 7748454099033316013, guid: df7ec8feb3c55447988d97d7619c880f, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.00013232
+      value: 0.00012
       objectReference: {fileID: 0}
     - target: {fileID: 7748454099033316013, guid: df7ec8feb3c55447988d97d7619c880f, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2435,7 +2435,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -14.7}
+  m_AnchoredPosition: {x: 0, y: -9.2}
   m_SizeDelta: {x: 100, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &426600359
@@ -4808,7 +4808,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC548\uB0B4"
+  m_text: "\uCCAB \uBC88\uC9F8 \uC904\\n\uB450 \uBC88\uC9F8 \uC904\\n\uC138 \uBC88\uC9F8
+    \uC904"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6ff1e5100805f435c9397db95f093095, type: 2}
   m_sharedMaterial: {fileID: 2594599523553996599, guid: 6ff1e5100805f435c9397db95f093095, type: 2}
@@ -4842,7 +4843,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -4873,7 +4874,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 1.8897209, y: 1.8166046, z: 1.9490051, w: 1.3582077}
+  m_margin: {x: -8.108917, y: 6.5433807, z: -8.295998, w: 6.5612087}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -7579,9 +7580,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3133494152545806682, guid: 3f7511fbc40ae7a4b89c3298a3de199d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1342332491}
-    - targetCorrespondingSourceObject: {fileID: 3133494152545806682, guid: 3f7511fbc40ae7a4b89c3298a3de199d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1342332492}
   m_SourcePrefab: {fileID: 100100000, guid: 3f7511fbc40ae7a4b89c3298a3de199d, type: 3}
 --- !u!4 &1342332487 stripped
 Transform:
@@ -7621,7 +7619,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed89fdf4236274844af0a59e303462a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  m_XRHandTrackingEvents: {fileID: 0}
+  m_XRHandTrackingEvents: {fileID: 1342332490}
   m_RootTransform: {fileID: 334772760}
   m_JointTransformReferences:
   - m_XRHandJointID: 1
@@ -7676,25 +7674,7 @@ MonoBehaviour:
     m_JointTransform: {fileID: 1342332498}
   - m_XRHandJointID: 2
     m_JointTransform: {fileID: 1342332502}
-  delayController: {fileID: 0}
---- !u!114 &1342332492
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 612906944}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cdf7b04ca47fc414cae52e71a86e403a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HandTrackingWithOffset
-  m_XRHandTrackingEvents: {fileID: 1342332490}
-  m_RootTransform: {fileID: 0}
-  m_JointTransformReferences: []
-  rotationController: {fileID: 2143797223}
-  positionController: {fileID: 95372487}
-  scaleController: {fileID: 1970794975}
+  delayController: {fileID: 423532998}
 --- !u!4 &1342332493 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2539154032915424125, guid: 3f7511fbc40ae7a4b89c3298a3de199d, type: 3}
@@ -11001,8 +10981,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: -23, y: 90, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.4, y: 1.18}
-  m_SizeDelta: {x: 100, y: 50}
+  m_AnchoredPosition: {x: 0.3979, y: 1.1849}
+  m_SizeDelta: {x: 120, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2100997954
 GameObject:

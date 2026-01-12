@@ -2,133 +2,159 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Video;
-using UnityEngine.Events;
 
 public class TutorialManager : MonoBehaviour
 {
-    [Header("1. 참조 연결 (Scripts & Objects)")]
-    public TypingCount typingCountScript;   // 카운트 감지용
-    public GameObject virtualKeyboardObject; // 씬에 있는 키보드 부모 오브젝트 (처음엔 숨김)
+    [Header("1. UI & References")]
+    public GameObject virtualKeyboardObject; 
+    public TypingCount typingCountScript; // (옵션) 리셋용
 
-    [Header("2. 비디오 단계 UI")]
-    public RawImage videoScreen;            // 비디오가 나오는 화면 (RawImage)
-    public VideoPlayer handGuidePlayer;     // 비디오 플레이어 컴포넌트
-    public GameObject videoControlButtons;  // '다시보기' & '연습하기' 버튼을 묶은 부모 오브젝트
-    public Button replayButton;             // 버튼1: 다시 보기
-    public Button startPracticeButton;      // 버튼2: 연습 시작
+    [Header("2. Video Components")]
+    public RawImage videoScreen;            
+    public VideoPlayer handGuidePlayer;     
+    public GameObject videoControlButtons;  // '다시보기' & '연습하기' 부모 패널
+    public Button replayButton;             
+    public Button startPracticeButton;
+    
+    [Header("3. Practice Session UI")]
+    public Button skipButton;               // [추가] 비디오 스킵 버튼
 
-    [Header("3. 연습 단계 UI")]
-    public GameObject practiceUI;           // 진행률 텍스트 등이 포함된 UI 부모 (처음엔 숨김)
-    public TextMeshProUGUI progressText;    // "0 / 6" 표시
-    public GameObject mainSessionButton;    // 6회 달성 시 나타날 '본 세션 시작' 버튼
+    public TextMeshProUGUI infoDisplayUI;   
+    public GameObject practiceUI;           
+    public TextMeshProUGUI progressText;    
+    public GameObject mainSessionButton;    
 
-    [Header("설정")]
-    public int goalCount = 6;               // 목표 횟수
+    [Header("4. Practice Settings")]
+    public int goalCount = 6;               
+
+    private int localCurrentCount = 0; 
+    private bool isPracticeActive = false; 
 
     private void Start()
     {
-        // --- 초기화 ---
-        
-        // 1. 키보드와 연습용 UI 숨기기
+        // 초기화
+        localCurrentCount = 0;
+        isPracticeActive = false;
+
+        // UI 초기 상태 설정
         if (virtualKeyboardObject != null) virtualKeyboardObject.SetActive(false);
         if (practiceUI != null) practiceUI.SetActive(false);
         if (mainSessionButton != null) mainSessionButton.SetActive(false);
 
-        // 2. 비디오 관련 설정
-        if (videoControlButtons != null) videoControlButtons.SetActive(false); // 선택 버튼 숨김
-        if (videoScreen != null) videoScreen.gameObject.SetActive(true);       // 화면 켜기
+        if (videoControlButtons != null) videoControlButtons.SetActive(false); 
+        if (videoScreen != null) videoScreen.gameObject.SetActive(true);       
+        if (infoDisplayUI != null) infoDisplayUI.gameObject.SetActive(true);     
         
-        // 3. 버튼 이벤트 연결
+        // 버튼 이벤트 연결
         if (replayButton != null) replayButton.onClick.AddListener(OnClickReplay);
         if (startPracticeButton != null) startPracticeButton.onClick.AddListener(OnClickStartPractice);
-
-        // 4. 비디오 종료 이벤트 연결 및 재생 시작
-        if (handGuidePlayer != null)
+        
+        // [추가] 스킵 버튼 이벤트 연결
+        if (skipButton != null)
         {
-            handGuidePlayer.loopPointReached += OnVideoFinished; // 비디오가 끝나면 호출될 함수 연결
-            PlayVideo();
+            skipButton.onClick.AddListener(OnClickSkip);
+            skipButton.gameObject.SetActive(true); // 시작 시 보이게 설정
         }
 
-        // 5. 타이핑 카운트 이벤트 연결
-        if (typingCountScript != null)
+        if (handGuidePlayer != null)
         {
-            typingCountScript.OnCountUpdated += OnTypeCountUpdated;
+            handGuidePlayer.loopPointReached += OnVideoFinished; 
+            PlayVideo();
         }
     }
 
     private void OnDestroy()
     {
-        // 이벤트 연결 해제 (메모리 관리)
         if (handGuidePlayer != null) handGuidePlayer.loopPointReached -= OnVideoFinished;
-        if (typingCountScript != null) typingCountScript.OnCountUpdated -= OnTypeCountUpdated;
     }
 
-    // --- 비디오 로직 ---
-
-    private void PlayVideo()
+    // --- [핵심 기능] Enter 키 로직 ---
+    public void OnEnterKeyPressed()
     {
-        if (videoControlButtons != null) videoControlButtons.SetActive(false); // 버튼 숨김
-        if (videoScreen != null) videoScreen.gameObject.SetActive(true);       // 화면 보이기
-        handGuidePlayer.Play();
-    }
+        if (!isPracticeActive) return;
 
-    // 비디오 재생이 끝났을 때 자동 호출
-    private void OnVideoFinished(VideoPlayer vp)
-    {
-        // 버튼 2개(다시보기, 연습하기) 표시
-        if (videoControlButtons != null) videoControlButtons.SetActive(true);
-    }
-
-    // 버튼1: 동영상 다시 보기
-    private void OnClickReplay()
-    {
-        PlayVideo();
-    }
-
-    // 버튼2: 타이핑 연습 시작
-    private void OnClickStartPractice()
-    {
-        // 1. 비디오 및 관련 버튼 숨기기
-        if (videoScreen != null) videoScreen.gameObject.SetActive(false);
-        if (videoControlButtons != null) videoControlButtons.SetActive(false);
-
-        // 2. 키보드 나타나게 하기
-        if (virtualKeyboardObject != null) virtualKeyboardObject.SetActive(true);
-
-        // 3. 연습 UI(진행률) 표시 및 초기화
-        if (practiceUI != null) practiceUI.SetActive(true);
-        UpdateProgressUI(typingCountScript.finishedCount);
-    }
-
-    // --- 연습(타이핑) 로직 ---
-
-    private void OnTypeCountUpdated(int currentCount)
-    {
-        // 연습 모드가 시작되지 않았는데 카운트가 올라가는 것 방지 (혹시 모를 예외 처리)
-        if (practiceUI != null && !practiceUI.activeSelf) return;
-
-        UpdateProgressUI(currentCount);
-
-        // 목표 달성 시 본 세션 버튼 표시
-        if (currentCount >= goalCount)
+        if (localCurrentCount < goalCount)
         {
-            if (mainSessionButton != null && !mainSessionButton.activeSelf)
+            localCurrentCount++;
+        }
+
+        UpdateProgressUI(localCurrentCount);
+
+        if (localCurrentCount >= goalCount)
+        {
+            if (mainSessionButton != null)
             {
                 mainSessionButton.SetActive(true);
             }
         }
     }
 
+    // --- 비디오 로직 ---
+    private void PlayVideo()
+    {
+        isPracticeActive = false; 
+        
+        // UI 상태 초기화
+        if (videoControlButtons != null) videoControlButtons.SetActive(false); 
+        if (videoScreen != null) videoScreen.gameObject.SetActive(true);
+        
+        // [추가] 비디오 재생 시 스킵 버튼 보이기
+        if (skipButton != null) skipButton.gameObject.SetActive(true);
+
+        handGuidePlayer.Play();
+    }
+
+    // 비디오가 끝났거나 스킵했을 때 호출됨
+    private void OnVideoFinished(VideoPlayer vp)
+    {
+        // [추가] 비디오가 끝났으니 스킵 버튼 숨기기
+        if (skipButton != null) skipButton.gameObject.SetActive(false);
+
+        // 다시보기/연습하기 버튼 표시
+        if (videoControlButtons != null) videoControlButtons.SetActive(true);
+    }
+
+    // [추가] 스킵 버튼 클릭 시 호출
+    private void OnClickSkip()
+    {
+        // 비디오 정지
+        if (handGuidePlayer != null) handGuidePlayer.Stop();
+        
+        // 비디오 완료 로직 강제 실행 (버튼 표시 등)
+        OnVideoFinished(handGuidePlayer);
+    }
+
+    private void OnClickReplay()
+    {
+        PlayVideo();
+    }
+
+    private void OnClickStartPractice()
+    {
+        if (videoScreen != null) videoScreen.gameObject.SetActive(false);
+        if (videoControlButtons != null) videoControlButtons.SetActive(false);
+        if (infoDisplayUI != null) infoDisplayUI.gameObject.SetActive(false);
+        
+        // [추가] 혹시 모르니 스킵 버튼 확실히 숨기기
+        if (skipButton != null) skipButton.gameObject.SetActive(false);
+
+        if (virtualKeyboardObject != null) virtualKeyboardObject.SetActive(true);
+        if (practiceUI != null) practiceUI.SetActive(true);
+        
+        localCurrentCount = 0;
+        isPracticeActive = true; 
+        
+        if (typingCountScript != null) typingCountScript.ResetCount();
+
+        UpdateProgressUI(0); 
+    }
+
     private void UpdateProgressUI(int current)
     {
         if (progressText != null)
         {
-            // [핵심] 실제 카운트가 7, 8이 되어도 화면에는 6으로 고정
             int visualCount = Mathf.Clamp(current, 0, goalCount);
-            
-            // 색상 효과 (완료 시 초록색)
             string countColor = (visualCount >= goalCount) ? "#00FF00" : "#FFFFFF";
-
             progressText.text = $"진행률: <color={countColor}>{visualCount}</color> / {goalCount}";
         }
     }
