@@ -25,7 +25,8 @@ public class FrequencySessionManager : MonoBehaviour
     private bool isSessionActive = false;
     private List<float> randomizedSessions = new List<float>(); 
     private int currentSessionIndex = 0; 
-
+// 현재 진행 순서(인덱스)를 반환하는 프로퍼티 (외부 읽기 전용)
+    public int CurrentIndex => currentSessionIndex;
     private void Start()
     {
         if (DataManager.Instance != null)

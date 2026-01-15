@@ -148,6 +148,11 @@ PlayerSettings:
   - {fileID: 0}
   - {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   - {fileID: -944628639613478452, guid: 819bb2620b7324c88bc80bf53d7dd87c, type: 3}
+  - {fileID: 11400000, guid: 56a98106ce58f09459a9990007b50acb, type: 2}
+  - {fileID: -944628639613478452, guid: 507eb55db5cc1421aba7317521bf8c19, type: 3}
+  - {fileID: -5632247236086540941, guid: 136958f90a130274b8b70a31eed352fb, type: 2}
+  - {fileID: 11400000, guid: bc6986e4232304b5ab91947ebe65bf65, type: 2}
+  - {fileID: -922223314619236015, guid: 2462f957eee75f940a3393fd6f039795, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -1005,7 +1010,7 @@ PlayerSettings:
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
-  platformRequiresReadableAssets: 0
+  platformRequiresReadableAssets: 1
   virtualTexturingSupportEnabled: 0
   insecureHttpOption: 0
   androidVulkanDenyFilterList: []

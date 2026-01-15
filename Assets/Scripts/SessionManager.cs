@@ -23,7 +23,8 @@ public class SessionManager : MonoBehaviour
     private bool isSessionActive = false;
     private List<float> sessionOffsets = new List<float>(); 
     private int currentSessionIndex = 0; 
-
+// 현재 진행 순서(인덱스)를 반환하는 프로퍼티 (외부 읽기 전용)
+    public int CurrentIndex => currentSessionIndex;
     public int TotalSessions => sessionOffsets.Count;
     public int CurrentSessionNum => currentSessionIndex + 1;
 
